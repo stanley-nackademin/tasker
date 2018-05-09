@@ -29,6 +29,12 @@ public final class Task {
         this.status = status;
     }
 
+    public Task(Long id, String name, TaskStatus status) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+    }
+
     public Long getId() {
         return id;
     }
