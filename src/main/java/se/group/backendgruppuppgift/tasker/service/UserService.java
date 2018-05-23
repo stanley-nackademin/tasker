@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-
 @Service
 public final class UserService {
 
