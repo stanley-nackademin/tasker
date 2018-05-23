@@ -1,6 +1,5 @@
 package se.group.backendgruppuppgift.tasker.resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import se.group.backendgruppuppgift.tasker.model.Team;
 import se.group.backendgruppuppgift.tasker.model.User;
@@ -28,7 +27,6 @@ public final class TeamResource {
 
     @Context
     private UriInfo uriInfo;
-
     private final MasterService service;
 
     public TeamResource(MasterService service) {
@@ -65,6 +63,16 @@ public final class TeamResource {
                 .build();
     }
 
+    @GET
+    @Path("{id}/users")
+    public List<UserWeb> getAllUsersInTeam(@PathParam("id") Long id) {
+        List<UserWeb> result = new ArrayList<>();
+        service.getTeamService().getAllUserByTeamId(id)
+                .forEach(t -> result.add(convertToUserWeb(t)));
+
+        return result;
+    }
+
     @PUT
     @Path("{id}")
     public Response updateTeam(@PathParam("id") Long id, TeamWeb teamWeb) {
@@ -75,9 +83,9 @@ public final class TeamResource {
     }
 
     @PUT
-    @Path("{id}/adduser")
+    @Path("{id}/users")
     public Response assignTeamToUser(@PathParam("id") Long id, UserWeb userWeb) {
-        return service.getUserService().addTeam(id, convertToUserObject(userWeb))
+        return service.getUserService().addTeam(id, convertToUser(userWeb))
                 .map(t -> Response.ok(convertToTeamWeb(t)))
                 .orElse(Response.status(NOT_FOUND))
                 .build();
@@ -92,16 +100,6 @@ public final class TeamResource {
                 .build();
     }
 
-    @GET
-    @Path("{teamName}/users")
-    public List<UserWeb> getAllUsersInTeam(@PathParam("teamName") String name) {
-        List<UserWeb> result = new ArrayList<>();
-        service.getTeamService().getAllUserByTeamName(name)
-                .forEach(t -> result.add(convertToUserWeb(t)));
-
-        return result;
-    }
-
     private Team convertToTeam(TeamWeb teamWeb) {
         return new Team(teamWeb.getName(), teamWeb.getIsActive());
     }
@@ -110,7 +108,7 @@ public final class TeamResource {
         return new TeamWeb(team.getId(), team.getName(), team.getIsActive());
     }
 
-    private User convertToUserObject(UserWeb userWeb) {
+    private User convertToUser(UserWeb userWeb) {
         return new User(userWeb.getUserNumber(), userWeb.getUsername(), userWeb.getFirstName(), userWeb.getLastName(), userWeb.getTeam());
     }
 

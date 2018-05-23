@@ -28,30 +28,18 @@ public final class TeamService {
     }
 
     public Optional<Team> findTeam(Long id) {
-        Optional<Team> result = teamRepository.findById(id);
-
-        if (result.isPresent())
-            return Optional.ofNullable(result.get());
-
-        return Optional.empty();
+        return teamRepository.findById(id);
     }
 
     public List<Team> getAllTeams() {
         return teamRepository.findAll();
     }
 
-    public List<User> getAllUserByTeamName(String teamName) {
-        Optional<Team> result = teamRepository.findByName(teamName);
-        List<User> users = new ArrayList<>();
-
-        if (result.isPresent()) {
-            Team team = result.get();
-            users = userRepository.findUsersByTeamId(team.getId());
-        }
-
-        return users;
+    public List<User> getAllUserByTeamId(Long id) {
+        return teamRepository.findById(id)
+                .map(u -> userRepository.findUsersByTeamId(u.getId()))
+                .orElse(new ArrayList<>());
     }
-
 
     public Optional<Team> updateTeam(Long id, Team team) {
         Optional<Team> result = teamRepository.findById(id);
@@ -59,16 +47,18 @@ public final class TeamService {
         if (result.isPresent()) {
             Team updatedTeam = result.get();
 
-            if (!isBlank(team.getName()))
+            if (!isBlank(team.getName())) {
                 updatedTeam.setName(team.getName());
+            }
 
-            if (team.getIsActive() != null)
+            if (team.getIsActive() != null) {
                 updatedTeam.setIsActive(team.getIsActive());
+            }
 
-            return Optional.ofNullable(teamRepository.save(updatedTeam));
+            return Optional.of(teamRepository.save(updatedTeam));
+        } else {
+            return Optional.empty();
         }
-
-        return Optional.empty();
     }
 
     public Optional<Team> deleteTeam(Long id) {
@@ -77,9 +67,9 @@ public final class TeamService {
         if (result.isPresent()) {
             teamRepository.deleteById(id);
 
-            return Optional.ofNullable(result.get());
+            return result;
+        } else {
+            return Optional.empty();
         }
-
-        return Optional.empty();
     }
 }
