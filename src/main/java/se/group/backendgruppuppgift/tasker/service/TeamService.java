@@ -56,20 +56,18 @@ public final class TeamService {
             }
 
             return Optional.of(teamRepository.save(updatedTeam));
-        } else {
-            return Optional.empty();
         }
+
+        return result;
     }
 
     public Optional<Team> deleteTeam(Long id) {
-        Optional<Team> result = teamRepository.findById(id);
+        Optional<Team> team = teamRepository.findById(id);
 
-        if (result.isPresent()) {
+        if (team.isPresent()) {
             teamRepository.deleteById(id);
-
-            return result;
-        } else {
-            return Optional.empty();
         }
+
+        return team;
     }
 }

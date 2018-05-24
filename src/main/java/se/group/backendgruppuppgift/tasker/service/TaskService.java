@@ -41,20 +41,20 @@ public final class TaskService {
         return taskRepository.findById(id);
     }
 
-    public List<Task> findTasksByParams(String status, String team, String user, String text, String value) {
+    public List<Task> findTasksByParams(String status, String team, String user, String text, String issue) {
         List<Task> result;
 
-        if (!isBlank(status) && isAllBlank(team, user, text, value)) {
+        if (!isBlank(status) && isAllBlank(team, user, text, issue)) {
             result = findTasksByStatus(status);
-        } else if (!isBlank(team) && isAllBlank(status, user, text, value)) {
+        } else if (!isBlank(team) && isAllBlank(status, user, text, issue)) {
             result = findByTeamId(team);
-        } else if (!isBlank(user) && isAllBlank(status, team, text, value)) {
+        } else if (!isBlank(user) && isAllBlank(status, team, text, issue)) {
             result = findByUserNumber(user);
-        } else if (!isBlank(text) && isAllBlank(status, team, user, value)) {
+        } else if (!isBlank(text) && isAllBlank(status, team, user, issue)) {
             result = taskRepository.findByDescriptionContains(text);
-        } else if (!isBlank(value) && value.equals("true") && isAllBlank(status, team, user, text)) {
+        } else if (!isBlank(issue) && issue.equals("true") && isAllBlank(status, team, user, text)) {
             result = taskRepository.findByIssueNotNull();
-        } else if (!isBlank(value) && value.equals("false") && isAllBlank(status, team, user, text)) {
+        } else if (!isBlank(issue) && issue.equals("false") && isAllBlank(status, team, user, text)) {
             result = taskRepository.findByIssueNull();
         } else {
             result = taskRepository.findAll();
@@ -69,16 +69,18 @@ public final class TaskService {
         if (taskResult.isPresent()) {
             Task updatedTask = taskResult.get();
 
-            if (!isBlank(task.getDescription()))
+            if (!isBlank(task.getDescription())) {
                 updatedTask.setDescription(task.getDescription());
+            }
 
-            if (!isBlank(task.getStatus().toString()))
+            if (!isBlank(task.getStatus().toString())) {
                 updatedTask.setStatus(task.getStatus());
+            }
 
-            return Optional.ofNullable(taskRepository.save(updatedTask));
+            return Optional.of(taskRepository.save(updatedTask));
         }
 
-        return Optional.empty();
+        return taskResult;
     }
 
     public Optional<Task> assignIssue(Long id, Issue issue) {
@@ -94,10 +96,10 @@ public final class TaskService {
             updatedTask.setStatus(UNSTARTED);
             updatedTask = taskRepository.save(updatedTask);
 
-            return Optional.ofNullable(updatedTask);
+            return Optional.of(updatedTask);
         }
 
-        return Optional.empty();
+        return task;
     }
 
     public Optional<Task> deleteTask(Long id) {
@@ -105,11 +107,9 @@ public final class TaskService {
 
         if (task.isPresent()) {
             taskRepository.deleteById(id);
-
-            return Optional.ofNullable(task.get());
         }
 
-        return Optional.empty();
+        return task;
     }
 
     private List<Task> findTasksByStatus(String status) {
@@ -132,13 +132,15 @@ public final class TaskService {
     }
 
     private void validateTask(Task task) {
-        if (task.getStatus() == null || isBlank(task.getDescription()))
+        if (task.getStatus() == null || isBlank(task.getDescription())) {
             throw new InvalidTaskException("Missing/invalid values");
+        }
     }
 
     private void validateTaskStatus(Task task) {
-        if (task.getStatus() != DONE)
+        if (task.getStatus() != DONE) {
             throw new InvalidTaskException("The current Task's status is not DONE");
+        }
     }
 
     private void validateIssue(Issue issue) {
@@ -147,17 +149,14 @@ public final class TaskService {
         }
     }
 
-    private List<Task> findByTeamId(String team) {
+    private List<Task> findByTeamId(String id) {
         List<Task> result = new ArrayList<>();
 
-        if (team.matches("[0-9]+")) {
-            Long teamId = Long.parseLong(team);
-            List<User> users = userRepository.findUsersByTeamId(teamId);
+        if (id.matches("[0-9]+")) {
+            List<User> users = userRepository.findUsersByTeamId(Long.parseLong(id));
 
             for (User u : users) {
-                Long id = u.getId();
-                List<Task> tasks = taskRepository.findByUserId(id);
-                result.addAll(tasks);
+                result.addAll(taskRepository.findByUserId(u.getId()));
             }
         }
 
@@ -170,8 +169,9 @@ public final class TaskService {
         if (userNumber.matches("[0-9]+")) {
             Optional<User> user = userRepository.findByUserNumber(Long.parseLong(userNumber));
 
-            if (user.isPresent())
+            if (user.isPresent()) {
                 result = taskRepository.findByUserId(user.get().getId());
+            }
         }
 
         return result;

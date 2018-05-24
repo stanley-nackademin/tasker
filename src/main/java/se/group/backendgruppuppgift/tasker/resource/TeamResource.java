@@ -5,7 +5,8 @@ import se.group.backendgruppuppgift.tasker.model.Team;
 import se.group.backendgruppuppgift.tasker.model.User;
 import se.group.backendgruppuppgift.tasker.model.web.TeamWeb;
 import se.group.backendgruppuppgift.tasker.model.web.UserWeb;
-import se.group.backendgruppuppgift.tasker.service.MasterService;
+import se.group.backendgruppuppgift.tasker.service.TeamService;
+import se.group.backendgruppuppgift.tasker.service.UserService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -17,7 +18,6 @@ import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 
 @Component
 @Consumes(APPLICATION_JSON)
@@ -27,15 +27,18 @@ public final class TeamResource {
 
     @Context
     private UriInfo uriInfo;
-    private final MasterService service;
 
-    public TeamResource(MasterService service) {
-        this.service = service;
+    private final TeamService teamService;
+    private final UserService userService;
+
+    public TeamResource(TeamService teamService, UserService userService) {
+        this.teamService = teamService;
+        this.userService = userService;
     }
 
     @POST
     public Response createTeam(TeamWeb teamWeb) {
-        Team result = service.getTeamService().createTeam(convertToTeam(teamWeb));
+        Team result = teamService.createTeam(convertToTeam(teamWeb));
         TeamWeb webResult = convertToTeamWeb(result);
 
         return Response.created(URI.create(uriInfo
@@ -48,7 +51,7 @@ public final class TeamResource {
     @GET
     public List<TeamWeb> getAllTeams() {
         List<TeamWeb> result = new ArrayList<>();
-        service.getTeamService().getAllTeams()
+        teamService.getAllTeams()
                 .forEach(t -> result.add(convertToTeamWeb(t)));
 
         return result;
@@ -57,7 +60,7 @@ public final class TeamResource {
     @GET
     @Path("{id}")
     public Response findTeam(@PathParam("id") Long id) {
-        return service.getTeamService().findTeam(id)
+        return teamService.findTeam(id)
                 .map(t -> Response.ok(convertToTeamWeb(t)))
                 .orElse(Response.status(NOT_FOUND))
                 .build();
@@ -67,7 +70,7 @@ public final class TeamResource {
     @Path("{id}/users")
     public List<UserWeb> getAllUsersInTeam(@PathParam("id") Long id) {
         List<UserWeb> result = new ArrayList<>();
-        service.getTeamService().getAllUserByTeamId(id)
+        teamService.getAllUserByTeamId(id)
                 .forEach(t -> result.add(convertToUserWeb(t)));
 
         return result;
@@ -76,7 +79,7 @@ public final class TeamResource {
     @PUT
     @Path("{id}")
     public Response updateTeam(@PathParam("id") Long id, TeamWeb teamWeb) {
-        return service.getTeamService().updateTeam(id, convertToTeam(teamWeb))
+        return teamService.updateTeam(id, convertToTeam(teamWeb))
                 .map(t -> Response.ok(convertToTeamWeb(t)))
                 .orElse(Response.status(NOT_FOUND))
                 .build();
@@ -85,7 +88,7 @@ public final class TeamResource {
     @PUT
     @Path("{id}/users")
     public Response assignTeamToUser(@PathParam("id") Long id, UserWeb userWeb) {
-        return service.getUserService().addTeam(id, convertToUser(userWeb))
+        return userService.addTeam(id, convertToUser(userWeb))
                 .map(t -> Response.ok(convertToTeamWeb(t)))
                 .orElse(Response.status(NOT_FOUND))
                 .build();
@@ -94,8 +97,8 @@ public final class TeamResource {
     @DELETE
     @Path("{id}")
     public Response deleteTeam(@PathParam("id") Long id) {
-        return service.getTeamService().deleteTeam(id)
-                .map(todo -> Response.status(NO_CONTENT))
+        return teamService.deleteTeam(id)
+                .map(todo -> Response.noContent())
                 .orElse(Response.status(NOT_FOUND))
                 .build();
     }
