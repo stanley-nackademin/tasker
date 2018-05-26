@@ -66,7 +66,6 @@ public final class UserResource {
                                   @QueryParam("username") @DefaultValue("") String userName) {
 
         List<UserWeb> result = new ArrayList<>();
-        //service.findAllUsersBy(firstName.toLowerCase(), lastName.toLowerCase(), userName.toLowerCase());
         service.findAllUsersBy(firstName, lastName, userName)
                 .forEach(u -> result.add(converter.fromEntityToWebData(u)));
 
@@ -76,24 +75,16 @@ public final class UserResource {
     @PUT
     @Path("{usernumber}")
     public Response updateUser(@PathParam("usernumber") Long userNumber, UserWeb userWeb) {
-//        Optional<User> input = converter.fromWebToEntityData(userWeb);
-//        Optional<UserWeb> output = converter.fromEntityToWebData(service.updateUser(userNumber, input.get()).get());
-
         return service.updateUser(userNumber, converter.fromWebToEntityData(userWeb))
                 .map(u -> Response.ok(converter.fromEntityToWebData(u)))
                 .orElse(Response.status(NOT_FOUND))
                 .build();
-
-        //return output.map(r -> Response.status(NO_CONTENT)).orElse(Response.status(NOT_FOUND)).build();
     }
 
-    // TODO: 2018-05-25 change activate to action
     @PUT
     @Path("{userNumber}/action")
     public void userDeactivator(@PathParam("userNumber") Long userNumber, Action action) {
         service.userActivator(userNumber, action);
-
-        //return Response.status(NO_CONTENT).build();
     }
 
     @PUT
@@ -108,11 +99,6 @@ public final class UserResource {
     @DELETE
     @Path("{userNumber}")
     public Response deleteUserByUserNumber(@PathParam("userNumber") Long userNumber) {
-//        Optional<User> task = service.deleteUserByUserNumber(userNumber);
-//        Optional<UserWeb> result = converter.fromEntityToWebData(task.get());
-//
-//        return result.map(r -> Response.status(NO_CONTENT)).orElse(Response.status(NOT_FOUND)).build();
-
         return service.deleteUserByUserNumber(userNumber)
                 .map(u -> Response.noContent())
                 .orElse(Response.status(NOT_FOUND))

@@ -194,12 +194,6 @@ public final class UserService {
         }
     }
 
-//    private void checkUsername(User user) {
-//        if (user.getUsername() == null || user.getUsername().length() <= 10) {
-//            throw new InvalidUserException("Username needs to be 10 characters or longer!");
-//        }
-//    }
-
     private void validateUsername(String username) {
         if (isBlank(username) || username.length() <= 10) {
             throw new InvalidUserException("Username needs to be 10 characters or longer!");
