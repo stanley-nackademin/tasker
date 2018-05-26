@@ -88,7 +88,7 @@ public final class TeamResource {
     @PUT
     @Path("{id}/users")
     public Response assignTeamToUser(@PathParam("id") Long id, UserWeb userWeb) {
-        return userService.addTeam(id, convertToUser(userWeb))
+        return userService.assignTeam(id, convertToUser(userWeb))
                 .map(t -> Response.ok(convertToTeamWeb(t)))
                 .orElse(Response.status(NOT_FOUND))
                 .build();
