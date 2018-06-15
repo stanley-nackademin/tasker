@@ -3,6 +3,7 @@ package se.group.backendgruppuppgift.tasker.service;
 import org.springframework.stereotype.Service;
 import se.group.backendgruppuppgift.tasker.model.Issue;
 import se.group.backendgruppuppgift.tasker.model.Task;
+import se.group.backendgruppuppgift.tasker.model.TaskStatus;
 import se.group.backendgruppuppgift.tasker.model.User;
 import se.group.backendgruppuppgift.tasker.repository.IssueRepository;
 import se.group.backendgruppuppgift.tasker.repository.TaskRepository;
@@ -10,11 +11,9 @@ import se.group.backendgruppuppgift.tasker.repository.UserRepository;
 import se.group.backendgruppuppgift.tasker.service.exception.InvalidIssueException;
 import se.group.backendgruppuppgift.tasker.service.exception.InvalidTaskException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.isAllBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static se.group.backendgruppuppgift.tasker.model.TaskStatus.*;
 
@@ -42,25 +41,7 @@ public final class TaskService {
     }
 
     public List<Task> findTasksByParams(String status, String team, String user, String text, String issue) {
-        List<Task> result;
-
-        if (!isBlank(status) && isAllBlank(team, user, text, issue)) {
-            result = findTasksByStatus(status);
-        } else if (!isBlank(team) && isAllBlank(status, user, text, issue)) {
-            result = findByTeamId(team);
-        } else if (!isBlank(user) && isAllBlank(status, team, text, issue)) {
-            result = findByUserNumber(user);
-        } else if (!isBlank(text) && isAllBlank(status, team, user, issue)) {
-            result = taskRepository.findByDescriptionContains(text);
-        } else if (!isBlank(issue) && issue.equals("true") && isAllBlank(status, team, user, text)) {
-            result = taskRepository.findByIssueNotNull();
-        } else if (!isBlank(issue) && issue.equals("false") && isAllBlank(status, team, user, text)) {
-            result = taskRepository.findByIssueNull();
-        } else {
-            result = taskRepository.findAll();
-        }
-
-        return result;
+        return taskRepository.findTasksByParams(convertToStatus(status), convertToTeamId(team), convertToUserId(user), text, issueExist(issue));
     }
 
     public Optional<Task> updateTask(Long id, Task task) {
@@ -112,21 +93,6 @@ public final class TaskService {
         return task;
     }
 
-    private List<Task> findTasksByStatus(String status) {
-        status = prepareString(status);
-
-        switch (status) {
-            case "started":
-                return taskRepository.findByStatus(STARTED);
-            case "unstarted":
-                return taskRepository.findByStatus(UNSTARTED);
-            case "done":
-                return taskRepository.findByStatus(DONE);
-            default:
-                return new ArrayList<>();
-        }
-    }
-
     private String prepareString(String string) {
         return string.trim().toLowerCase();
     }
@@ -149,31 +115,47 @@ public final class TaskService {
         }
     }
 
-    private List<Task> findByTeamId(String id) {
-        List<Task> result = new ArrayList<>();
+    private Long convertToUserId(String userNumber) {
+        Long result = null;
 
-        if (id.matches("[0-9]+")) {
-            List<User> users = userRepository.findUsersByTeamId(Long.parseLong(id));
+        if (userNumber.matches("[0-9]+")) {
+            Optional<User> user = userRepository.findByUserNumber(Long.parseLong(userNumber));
 
-            for (User u : users) {
-                result.addAll(taskRepository.findByUserId(u.getId()));
+            if (user.isPresent()) {
+                result = user.get().getId();
+            } else {
+                result = 0L;
             }
         }
 
         return result;
     }
 
-    private List<Task> findByUserNumber(String userNumber) {
-        List<Task> result = new ArrayList<>();
+    private Long convertToTeamId(String team) {
+        return team.matches("[0-9]+") ? Long.parseLong(team) : null;
+    }
 
-        if (userNumber.matches("[0-9]+")) {
-            Optional<User> user = userRepository.findByUserNumber(Long.parseLong(userNumber));
-
-            if (user.isPresent()) {
-                result = taskRepository.findByUserId(user.get().getId());
-            }
+    private TaskStatus convertToStatus(String status) {
+        switch (prepareString(status)) {
+            case "started":
+                return STARTED;
+            case "unstarted":
+                return UNSTARTED;
+            case "done":
+                return DONE;
+            default:
+                return null;
         }
+    }
 
-        return result;
+    private Boolean issueExist(String issue) {
+        switch (prepareString(issue)) {
+            case "true":
+                return true;
+            case "false":
+                return false;
+            default:
+                return null;
+        }
     }
 }
