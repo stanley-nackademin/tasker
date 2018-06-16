@@ -118,11 +118,11 @@ public final class TaskService {
     private Long convertToUserId(String userNumber) {
         Long result = null;
 
-        if (userNumber.matches("[0-9]+")) {
-            Optional<User> user = userRepository.findByUserNumber(Long.parseLong(userNumber));
+        if (!userNumber.isEmpty()) {
+            if (userNumber.matches("[0-9]+")) {
+                Optional<User> user = userRepository.findByUserNumber(Long.parseLong(userNumber));
 
-            if (user.isPresent()) {
-                result = user.get().getId();
+                result = user.isPresent() ? user.get().getId() : 0L;
             } else {
                 result = 0L;
             }
@@ -132,7 +132,13 @@ public final class TaskService {
     }
 
     private Long convertToTeamId(String team) {
-        return team.matches("[0-9]+") ? Long.parseLong(team) : null;
+        Long result = null;
+
+        if (!team.isEmpty()) {
+            result = team.matches("[0-9]+") ? Long.parseLong(team) : 0L;
+        }
+
+        return result;
     }
 
     private TaskStatus convertToStatus(String status) {
