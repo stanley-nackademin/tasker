@@ -169,6 +169,7 @@ public final class UserService {
         if (user.isPresent()) {
             repository.removeByUserNumber(userNumber);
         }
+        System.out.println(user);
         return user;
     }
 

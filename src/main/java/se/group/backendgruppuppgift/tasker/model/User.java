@@ -47,9 +47,7 @@ public final class User {
         return userNumber;
     }
 
-    public void setUserNumber(Long userNumber) {
-        this.userNumber = userNumber;
-    }
+    public void setUserNumber(Long userNumber) { this.userNumber = userNumber; }
 
     public String getUsername() {
         return username;
