@@ -180,7 +180,7 @@ public final class UserService {
         return user;
     }
 
-    private void maxUserLimitValidation(Team team) {
+    protected void maxUserLimitValidation(Team team) {
         List<User> users = userRepository.findByTeam(team);
 
         if (users.size() >= 10) {

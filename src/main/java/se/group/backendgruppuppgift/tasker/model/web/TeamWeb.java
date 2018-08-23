@@ -2,9 +2,13 @@ package se.group.backendgruppuppgift.tasker.model.web;
 
 public final class TeamWeb {
 
-    private final Long id;
-    private final String name;
-    private final Boolean isActive;
+    private Long id;
+    private String name;
+    private Boolean isActive;
+
+    protected TeamWeb() {
+
+    }
 
     public TeamWeb(Long id, String name, Boolean isActive) {
         this.id = id;

@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public final class IssueWeb {
 
-    private final String description;
+    private String description;
+
+    protected IssueWeb() {
+
+    }
 
     @JsonCreator
     public IssueWeb(String description) {

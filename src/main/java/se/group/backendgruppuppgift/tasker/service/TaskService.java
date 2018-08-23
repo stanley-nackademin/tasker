@@ -54,8 +54,12 @@ public final class TaskService {
                 updatedTask.setDescription(task.getDescription());
             }
 
-            if (!isBlank(task.getStatus().toString())) {
-                updatedTask.setStatus(task.getStatus());
+            if (task.getStatus() != null) {
+                if (!isBlank(task.getStatus().toString())) {
+                    updatedTask.setStatus(task.getStatus());
+                }
+            } else {
+                throw new InvalidTaskException("Invalid status");
             }
 
             return Optional.of(taskRepository.save(updatedTask));

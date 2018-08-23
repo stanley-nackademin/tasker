@@ -6,6 +6,10 @@ public final class Action {
 
     private String action;
 
+    protected Action() {
+
+    }
+
     @JsonCreator
     public Action(String action) {
         this.action = action;
