@@ -26,7 +26,7 @@ public class TaskServiceTest {
     TaskService taskService;
 
     @Test
-    public void updateTask() {
+    public void updateTaskTest() {
         Task task = new Task("hej", TaskStatus.UNSTARTED);
         Task createdTask = taskService.createTask(task);
 
@@ -35,7 +35,7 @@ public class TaskServiceTest {
     }
 
     @Test
-    public void shouldDelegateFreeTaskToFreeUser() {
+    public void shouldDelegateFreeTaskToFreeUserTest() {
 
         userNumber = 1005L;
         taskId = 7L;
@@ -50,7 +50,7 @@ public class TaskServiceTest {
     }
 
     @Test(expected = InvalidUserException.class)
-    public void shouldNotDelegateFreeTaskToInactiveUser() {
+    public void shouldNotDelegateFreeTaskToInactiveUserTest() {
 
         userNumber = 1001L;
         taskId = 10L;
@@ -63,7 +63,7 @@ public class TaskServiceTest {
     }
 
     @Test(expected = InvalidUserException.class)
-    public void shouldNotDelegateFreeTaskToUserWithMoreThanFiveTasks() {
+    public void shouldNotDelegateFreeTaskToUserWithMoreThanFiveTasksTest() {
 
         userNumber = 1004L;
         taskId = 28L;
@@ -76,7 +76,7 @@ public class TaskServiceTest {
     }
 
     @Test(expected = InvalidTaskException.class)
-    public void shouldNotDelegateDelegatedTaskToUser() {
+    public void shouldNotDelegateDelegatedTaskToUserTest() {
 
         userNumber = 1007L;
         taskId = 5L;

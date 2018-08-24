@@ -183,7 +183,7 @@ public final class UserService {
     protected void maxUserLimitValidation(Team team) {
         List<User> users = userRepository.findByTeam(team);
 
-        if (users.size() >= 10) {
+        if (users.size() < 10) {
             throw new InvalidTeamException("Team: " + team.getName() + " is full, max 10 users in a team");
         }
     }
